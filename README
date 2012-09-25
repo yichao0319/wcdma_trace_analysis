@@ -1,0 +1,54 @@
+Analyze the WCDMA traces collected by USRP.
+
+-------------------------
+1. Collect traces:
+Becasue the WCDMA uses 3.84Mchips/s rate, we need to set the sampling rate to 7.68M samples per second.
+
+uhd_rx_cfile.py -v --show-async-msg -g 45 --samp-rate=7.68e6 -f 1965M uhd_signal.dat
+
+We can use USRP utility tool to visualize collected trace:
+
+gr_plot_yichao.py -s 20000000 -B 5000 -R 7.68e6 uhd_signal.dat
+
+
+-------------------------
+2. Compile codes:
+make
+
+
+2.1. autocorrelate.cc
+the main code to analyze WCDMA traces which includes:
+i) find slot and frame boundary
+ii) identify secondary synchronization code, first scrambling code, second scrambling code
+
+usage:
+autocorr <preamble input file> <start index> <end index> <threshold>
+
+e.g.
+./autocorr DL_wdata_768.dat 22206100 22400000 7 
+perl autocorrelate.pl
+
+
+2.2. output_ycc.cc
+(codes from Apurv with slitely modification)
+Convert USRP binary signal files to readable format:
+[index] [magnitude] [phase] [real] [imaginary]
+
+usage: 
+output <file name>
+
+e.g.
+output uhd_signal.dat
+
+
+2.3. autocorrelate2.cc
+
+usage: 
+autocorr2 <preamble input file> <start index> <end index> <threshold>
+
+e.g.
+./autocorr2 DL_wdata_768.dat 21000000 21030000 > coeff2.txt 
+gnuplot plot_coeff2.plot
+
+batch:
+batch.pl
